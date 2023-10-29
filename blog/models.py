@@ -1,14 +1,15 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
-
+from ckeditor.fields import RichTextField
 from mptt.models import MPTTModel, TreeForeignKey
 
 
 class Category(MPTTModel):
     name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100)
+    slug = models.SlugField(max_length=100, default='', unique=True)
     parent = TreeForeignKey(
         'self', 
         related_name='children', 
@@ -30,7 +31,7 @@ class Category(MPTTModel):
 
 class Tag(models.Model):
     name = models.CharField(max_length=100)
-    slug = models.SlugField(max_length=100)
+    slug = models.SlugField(max_length=100, default='', unique=True)
     
     def __str__(self) -> str:
         return self.name
@@ -48,7 +49,7 @@ class Post(models.Model):
     )
     tags = models.ManyToManyField(Tag, related_name='post')
     created_at = models.DateTimeField(auto_now_add=True)
-    slug = models.SlugField(max_length=200, default=True)
+    slug = models.SlugField(max_length=200, default='', unique=True)
 
     def __str__(self) -> str:
         return self.title
@@ -58,14 +59,18 @@ class Post(models.Model):
     
     def get_recipes(self):
         return self.recipes.all()
+    
+    def get_comments(self):
+        return self.comment.all()
+     
 
 class Recipe(models.Model):
     name = models.CharField(max_length=100)
     serves = models.CharField(max_length=50)
     prep_time = models.PositiveBigIntegerField(default=0)
     cook_time = models.PositiveBigIntegerField(default=0)
-    ingredients = models.TextField()
-    directions = models.TextField()
+    ingredients = RichTextField()
+    directions = RichTextField()
     post = models.ForeignKey(
         Post,
         related_name='recipes',
@@ -77,7 +82,11 @@ class Recipe(models.Model):
 class Comment(models.Model):
     name = models.CharField(max_length=50)
     email = models.CharField(max_length=100)
-    website = models.CharField(max_length=150)
+    website = models.CharField(max_length=150, blank=True, null=True)
     message = models.TextField(max_length=500)
+    created_at = models.DateTimeField(default=timezone.now)
     post = models.ForeignKey(Post, related_name='comment', on_delete=models.CASCADE
     )
+
+    def __str__(self) -> str:
+        return self.name

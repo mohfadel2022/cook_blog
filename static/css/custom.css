@@ -1,0 +1,15 @@
+.contact__widget ul li img,
+.header__social img{
+    height: 50px!important;
+    width: 50px!important;
+    padding: 15px;
+}
+
+.sidebar__item__categories .p-left {
+	margin-left: 30px;
+}
+
+...idebar__item__categories .p-left span {
+	float: right;
+	font-weight: 400;
+}
